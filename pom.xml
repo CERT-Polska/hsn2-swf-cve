@@ -3,19 +3,19 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>pl.nask.hsn2</groupId>
     <artifactId>hsn2-swf-service</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>2.0.0-SNAPSHOT</version>
     <name>SWF Service</name>
 
     <dependencies>
         <dependency>
             <groupId>pl.nask.hsn2</groupId>
             <artifactId>swf-tool</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>pl.nask.hsn2</groupId>
             <artifactId>hsn2-service-commons</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.testng</groupId>
@@ -33,13 +33,13 @@
         <dependency>
             <groupId>pl.nask.hsn2</groupId>
             <artifactId>cve_2007_0071-plugin</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
             <groupId>pl.nask.hsn2</groupId>
             <artifactId>cve_2009_1869-plugin</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>2.0.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 
