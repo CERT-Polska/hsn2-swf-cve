@@ -29,7 +29,7 @@ public final class SwfService {
 		SwfCommandLineParams cmd = parseArguments(args);
 
 		CveTool tool = initCveTool(cmd.getPluginsPath());
-		GenericService service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName());
+		GenericService service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName(), cmd.getRbtNotifyExchangeName());
 
 		cmd.applyArguments(service);
 		service.run();
