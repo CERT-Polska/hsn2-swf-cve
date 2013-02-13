@@ -19,20 +19,41 @@
 
 package pl.nask.hsn2.service;
 
+import java.lang.Thread.UncaughtExceptionHandler;
+
+import org.apache.commons.daemon.Daemon;
+import org.apache.commons.daemon.DaemonContext;
+import org.apache.commons.daemon.DaemonController;
+import org.apache.commons.daemon.DaemonInitException;
+
 import pl.nask.hsn2.GenericService;
 import pl.nask.swftool.cvetool.CveTool;
 
-public final class SwfService {
-	private SwfService() {}
+public final class SwfService implements Daemon {
 
-	public static void main(String[] args) throws InterruptedException {
-		SwfCommandLineParams cmd = parseArguments(args);
+	private volatile DaemonController daemonCtrl = null;
+	private SwfCommandLineParams cmd;
+	private Thread serviceRunner;
 
-		CveTool tool = initCveTool(cmd.getPluginsPath());
-		GenericService service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName(), cmd.getRbtNotifyExchangeName());
+	public static void main(final String[] args) throws DaemonInitException, Exception {
 
-		cmd.applyArguments(service);
-		service.run();
+		SwfService swfs = new SwfService();
+		swfs.init(new DaemonContext() {
+			
+			@Override
+			public DaemonController getController() {
+				return null;
+			}
+			
+			@Override
+			public String[] getArguments() {
+				return args;
+			}
+		});
+		swfs.start();
+		swfs.serviceRunner.join();
+		swfs.stop();
+		swfs.destroy();
 	}
 
 	private static CveTool initCveTool(String pluginsDirectory) {
@@ -49,5 +70,69 @@ public final class SwfService {
 		params.parseParams(args);
 
 		return params;
+	}
+
+	
+
+	@Override
+	public void init(DaemonContext context) throws DaemonInitException, Exception {
+		daemonCtrl = context.getController();
+		cmd = parseArguments(context.getArguments());
+		
+	}
+
+	@Override
+	public void start() throws Exception {
+		CveTool tool = initCveTool(cmd.getPluginsPath());
+		
+		final GenericService service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName(), cmd.getRbtNotifyExchangeName());
+		cmd.applyArguments(service);
+		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
+			
+			@Override
+			public void uncaughtException(Thread t, Throwable e) {
+				if ( daemonCtrl != null) {
+//					daemonCtrl.reload();
+					daemonCtrl.fail(e.getMessage());
+				}
+				else {
+					System.exit(1);
+				}
+				
+			}
+		});
+		
+		serviceRunner = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					service.run();
+				} catch (InterruptedException e) {
+					if ( daemonCtrl != null) {
+						daemonCtrl.shutdown();
+					} else {
+						System.exit(0);
+					}
+				}
+				
+			}
+		});
+		serviceRunner.start();
+		
+		
+	}
+
+	@Override
+	public void stop() throws Exception {
+		serviceRunner.interrupt();
+		serviceRunner.join();
+		
+		
+	}
+
+	@Override
+	public void destroy() {
+		daemonCtrl = null;
+		
 	}
 }
