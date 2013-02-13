@@ -12,7 +12,7 @@
     <files>
     	<file>    	
     		<destName>hsn2-swf-cve.jar</destName>
-    		<source>${project.build.directory}/hsn2-swf-service-${version}.jar</source>
+    		<source>${project.build.directory}/hsn2-swf-cve-${version}.jar</source>
     		<fileMode>0644</fileMode>
     	</file>
     </files>
