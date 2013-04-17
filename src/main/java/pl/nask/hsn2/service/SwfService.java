@@ -30,16 +30,13 @@ import pl.nask.hsn2.GenericService;
 import pl.nask.swftool.cvetool.CveTool;
 
 public final class SwfService implements Daemon {
-
 	private volatile DaemonController daemonCtrl = null;
 	private SwfCommandLineParams cmd;
 	private Thread serviceRunner;
 
-	public static void main(final String[] args) throws DaemonInitException, Exception {
-
+	public static void main(final String[] args) throws DaemonInitException, InterruptedException {
 		SwfService swfs = new SwfService();
 		swfs.init(new DaemonContext() {
-			
 			@Override
 			public DaemonController getController() {
 				return null;
@@ -75,14 +72,14 @@ public final class SwfService implements Daemon {
 	
 
 	@Override
-	public void init(DaemonContext context) throws DaemonInitException, Exception {
+	public void init(DaemonContext context) throws DaemonInitException {
 		daemonCtrl = context.getController();
 		cmd = parseArguments(context.getArguments());
 		
 	}
 
 	@Override
-	public void start() throws Exception {
+	public void start() {
 		CveTool tool = initCveTool(cmd.getPluginsPath());
 		
 		final GenericService service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName(), cmd.getRbtNotifyExchangeName());
@@ -92,13 +89,11 @@ public final class SwfService implements Daemon {
 			@Override
 			public void uncaughtException(Thread t, Throwable e) {
 				if ( daemonCtrl != null) {
-//					daemonCtrl.reload();
 					daemonCtrl.fail(e.getMessage());
 				}
 				else {
 					System.exit(1);
 				}
-				
 			}
 		});
 		
@@ -118,21 +113,16 @@ public final class SwfService implements Daemon {
 			}
 		});
 		serviceRunner.start();
-		
-		
 	}
 
 	@Override
-	public void stop() throws Exception {
+	public void stop() throws InterruptedException {
 		serviceRunner.interrupt();
 		serviceRunner.join();
-		
-		
 	}
 
 	@Override
 	public void destroy() {
 		daemonCtrl = null;
-		
 	}
 }

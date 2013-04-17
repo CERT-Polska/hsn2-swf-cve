@@ -19,6 +19,12 @@
 			<groupId>pl.nask.hsn2</groupId>
 			<artifactId>swf-tool</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>pl.nask.hsn2</groupId>
@@ -29,11 +35,23 @@
 			<groupId>pl.nask.hsn2</groupId>
 			<artifactId>cve_2007_0071-plugin</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>pl.nask.hsn2</groupId>
 			<artifactId>cve_2009_1869-plugin</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<artifactId>slf4j-log4j12</artifactId>
+					<groupId>org.slf4j</groupId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.testng</groupId>
@@ -134,9 +152,9 @@
 						<artifactId>maven-assembly-plugin</artifactId>
 						<version>${assembly.plugin.version}</version>
 						<configuration>
-							<descriptorRefs>
-								<descriptorRef>jar-with-dependencies</descriptorRef>
-							</descriptorRefs>
+							<descriptors>
+								<descriptor>src/main/assembly/hsn2-onejar.xml</descriptor>
+							</descriptors>
 						</configuration>
 						<executions>
 							<execution>

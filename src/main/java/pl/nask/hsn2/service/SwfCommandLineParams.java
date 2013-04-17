@@ -29,7 +29,7 @@ import pl.nask.hsn2.CommandLineParams;
 import pl.nask.hsn2.GenericServiceInfo;
 
 public class SwfCommandLineParams extends CommandLineParams {
-	private final static Logger LOGGER = LoggerFactory.getLogger("SwfCommandLineParams");
+	private final static Logger LOGGER = LoggerFactory.getLogger(SwfCommandLineParams.class);
 	private final static OptionNameWrapper PLUGINS_PATH = new OptionNameWrapper("plugins", "pluginsPath");
 
 	@Override
