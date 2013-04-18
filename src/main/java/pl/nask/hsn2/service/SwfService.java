@@ -25,6 +25,8 @@ import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonController;
 import org.apache.commons.daemon.DaemonInitException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import pl.nask.hsn2.GenericService;
 import pl.nask.swftool.cvetool.CveTool;
@@ -33,6 +35,8 @@ public final class SwfService implements Daemon {
 	private volatile DaemonController daemonCtrl = null;
 	private SwfCommandLineParams cmd;
 	private Thread serviceRunner;
+	GenericService service = null;
+	private static final Logger LOGGER = LoggerFactory.getLogger(SwfService.class);
 
 	public static void main(final String[] args) throws DaemonInitException, InterruptedException {
 		SwfService swfs = new SwfService();
@@ -48,7 +52,9 @@ public final class SwfService implements Daemon {
 			}
 		});
 		swfs.start();
-		swfs.serviceRunner.join();
+		while (!swfs.serviceRunner.isInterrupted()) {
+			Thread.sleep(1000l);
+		}
 		swfs.stop();
 		swfs.destroy();
 	}
@@ -75,6 +81,7 @@ public final class SwfService implements Daemon {
 	public void init(DaemonContext context) throws DaemonInitException {
 		daemonCtrl = context.getController();
 		cmd = parseArguments(context.getArguments());
+		LOGGER.info("Service initialized: {}",this.getClass().getSimpleName());
 		
 	}
 
@@ -82,7 +89,7 @@ public final class SwfService implements Daemon {
 	public void start() {
 		CveTool tool = initCveTool(cmd.getPluginsPath());
 		
-		final GenericService service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName(), cmd.getRbtNotifyExchangeName());
+		this.service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName(), cmd.getRbtNotifyExchangeName());
 		cmd.applyArguments(service);
 		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
 			
@@ -92,6 +99,7 @@ public final class SwfService implements Daemon {
 					daemonCtrl.fail(e.getMessage());
 				}
 				else {
+					LOGGER.warn("Service exit.");
 					System.exit(1);
 				}
 			}
@@ -113,16 +121,24 @@ public final class SwfService implements Daemon {
 			}
 		});
 		serviceRunner.start();
+		if (service.waitForStartUp()) {
+			LOGGER.info("Service started.");
+		} else {
+			LOGGER.warn("Error on startup.please report.");
+		}
 	}
 
 	@Override
 	public void stop() throws InterruptedException {
+		LOGGER.info("Stopping service.");
 		serviceRunner.interrupt();
+		service.stop();
 		serviceRunner.join();
 	}
 
 	@Override
 	public void destroy() {
 		daemonCtrl = null;
+		LOGGER.info("Service shut down.");
 	}
 }
