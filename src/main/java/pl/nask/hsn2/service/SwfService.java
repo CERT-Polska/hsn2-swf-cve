@@ -19,126 +19,51 @@
 
 package pl.nask.hsn2.service;
 
-import java.lang.Thread.UncaughtExceptionHandler;
-
-import org.apache.commons.daemon.Daemon;
 import org.apache.commons.daemon.DaemonContext;
 import org.apache.commons.daemon.DaemonController;
 import org.apache.commons.daemon.DaemonInitException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import pl.nask.hsn2.GenericService;
+import pl.nask.hsn2.CommandLineParams;
+import pl.nask.hsn2.ServiceMain;
+import pl.nask.hsn2.task.TaskFactory;
 import pl.nask.swftool.cvetool.CveTool;
 
-public final class SwfService implements Daemon {
-	private volatile DaemonController daemonCtrl = null;
-	private SwfCommandLineParams cmd;
-	private Thread serviceRunner;
-	GenericService service = null;
-	private static final Logger LOGGER = LoggerFactory.getLogger(SwfService.class);
-
+public final class SwfService extends ServiceMain {
+	
 	public static void main(final String[] args) throws DaemonInitException, InterruptedException {
 		SwfService swfs = new SwfService();
 		swfs.init(new DaemonContext() {
-			@Override
 			public DaemonController getController() {
 				return null;
 			}
-			
-			@Override
 			public String[] getArguments() {
 				return args;
 			}
 		});
 		swfs.start();
-		while (!swfs.serviceRunner.isInterrupted()) {
-			Thread.sleep(1000l);
-		}
-		swfs.stop();
-		swfs.destroy();
 	}
 
+	@Override
+	protected void prepareService() {
+	}
+
+	@Override
+	protected TaskFactory createTaskFactory() {
+		CveTool tool = initCveTool(((SwfCommandLineParams)getCommandLineParams()).getPluginsPath());
+		return new SwfTaskFactory(tool);
+	}
+	
+	@Override
+	protected CommandLineParams newCommandLineParams() {
+		return new SwfCommandLineParams();
+	}
+	
 	private static CveTool initCveTool(String pluginsDirectory) {
 		CveTool ct = new CveTool();
 		ct.loadPlugins(pluginsDirectory);
 		ct.printPluginsInfo();
 		ct.bulidPluginsDistributor();
-
+		
 		return ct;
-	}
-
-	private static SwfCommandLineParams parseArguments(String[] args) {
-		SwfCommandLineParams params = new SwfCommandLineParams();
-		params.parseParams(args);
-
-		return params;
-	}
-
-	
-
-	@Override
-	public void init(DaemonContext context) throws DaemonInitException {
-		daemonCtrl = context.getController();
-		cmd = parseArguments(context.getArguments());
-		LOGGER.info("Service initialized: {}",this.getClass().getSimpleName());
-		
-	}
-
-	@Override
-	public void start() {
-		CveTool tool = initCveTool(cmd.getPluginsPath());
-		
-		this.service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName(), cmd.getRbtNotifyExchangeName());
-		cmd.applyArguments(service);
-		Thread.setDefaultUncaughtExceptionHandler(new UncaughtExceptionHandler() {
-			
-			@Override
-			public void uncaughtException(Thread t, Throwable e) {
-				if ( daemonCtrl != null) {
-					daemonCtrl.fail(e.getMessage());
-				}
-				else {
-					LOGGER.warn("Service exit.");
-					System.exit(1);
-				}
-			}
-		});
-		
-		serviceRunner = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					service.run();
-				} catch (InterruptedException e) {
-					if ( daemonCtrl != null) {
-						daemonCtrl.shutdown();
-					} else {
-						System.exit(0);
-					}
-				}
-				
-			}
-		});
-		serviceRunner.start();
-		if (service.waitForStartUp()) {
-			LOGGER.info("Service started.");
-		} else {
-			LOGGER.warn("Error on startup.please report.");
-		}
-	}
-
-	@Override
-	public void stop() throws InterruptedException {
-		LOGGER.info("Stopping service.");
-		serviceRunner.interrupt();
-		service.stop();
-		serviceRunner.join();
-	}
-
-	@Override
-	public void destroy() {
-		daemonCtrl = null;
-		LOGGER.info("Service shut down.");
 	}
 }
