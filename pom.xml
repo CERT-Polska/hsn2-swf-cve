@@ -7,6 +7,7 @@
 
 	<properties>
 		<mainClass>pl.nask.hsn2.service.SwfService</mainClass>
+		<plugin.version.dependency>2.3</plugin.version.dependency>
 	</properties>
 
 	<parent>
@@ -63,7 +64,7 @@
 			</plugin>
 			<plugin>
 				<artifactId>maven-dependency-plugin</artifactId>
-				<version>${dependency.plugin.version}</version>
+				<version>${plugin.version.dependency}</version>
 				<executions>
 					<execution>
 						<id>copy-dependencies</id>
