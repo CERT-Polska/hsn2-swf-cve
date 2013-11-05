@@ -29,15 +29,23 @@ import pl.nask.swftool.cvetool.CveTool;
 
 public class SwfTaskFactory implements TaskFactory {
 
-    private final CveTool tool;
+    private static CveTool tool;
 
-    public SwfTaskFactory(CveTool tool) {
-        this.tool = tool;
+    public static void prepereForAllThreads(String pluginsPath) {
+    	CveTool tool = initCveTool(pluginsPath);
+        SwfTaskFactory.tool = tool;
     }
 
     @Override
     public Task newTask(TaskContext jobContext, ParametersWrapper parameters, ObjectDataWrapper data) throws ParameterException {
-        return new SwfTask(tool, jobContext, data);
+    	return new SwfTask(tool, jobContext, data);
     }
-
+    
+    private static CveTool initCveTool(String pluginsDirectory) {
+		CveTool ct = new CveTool();
+		ct.loadPlugins(pluginsDirectory);
+		ct.printPluginsInfo();
+		ct.bulidPluginsDistributor();
+		return ct;
+	}
 }

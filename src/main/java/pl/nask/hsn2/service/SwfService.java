@@ -26,7 +26,6 @@ import org.apache.commons.daemon.DaemonInitException;
 import pl.nask.hsn2.CommandLineParams;
 import pl.nask.hsn2.ServiceMain;
 import pl.nask.hsn2.task.TaskFactory;
-import pl.nask.swftool.cvetool.CveTool;
 
 public final class SwfService extends ServiceMain {
 	
@@ -48,22 +47,14 @@ public final class SwfService extends ServiceMain {
 	}
 
 	@Override
-	protected TaskFactory createTaskFactory() {
-		CveTool tool = initCveTool(((SwfCommandLineParams)getCommandLineParams()).getPluginsPath());
-		return new SwfTaskFactory(tool);
-	}
-	
-	@Override
 	protected CommandLineParams newCommandLineParams() {
 		return new SwfCommandLineParams();
 	}
-	
-	private static CveTool initCveTool(String pluginsDirectory) {
-		CveTool ct = new CveTool();
-		ct.loadPlugins(pluginsDirectory);
-		ct.printPluginsInfo();
-		ct.bulidPluginsDistributor();
-		
-		return ct;
+
+	@Override
+	protected Class<? extends TaskFactory> initializeTaskFactory() {
+		SwfCommandLineParams cmd = (SwfCommandLineParams)getCommandLineParams();
+		SwfTaskFactory.prepereForAllThreads(cmd.getPluginsPath());
+		return SwfTaskFactory.class;
 	}
 }
