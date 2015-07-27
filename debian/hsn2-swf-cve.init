@@ -15,7 +15,7 @@ HSN2_COMPONENT="swf-cve"
 MAINCLASS="pl.nask.hsn2.service.SwfService"
 CONFFILE=/etc/hsn2/swf-cve.conf
 
-HSN2_JMX_PORT=1110
+HSN2_JMX_PORT=1112
 
 . /lib/hsn2/init-functions-java
 
