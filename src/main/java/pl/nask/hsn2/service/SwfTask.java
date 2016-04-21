@@ -1,8 +1,8 @@
 /*
  * Copyright (c) NASK, NCSC
- * 
+ *
  * This file is part of HoneySpider Network 2.0.
- * 
+ *
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -44,7 +44,7 @@ import pl.nask.swftool.cvetool.detector.CveDetectionResults;
 import pl.nask.swftool.cvetool.detector.CveResult;
 
 public class SwfTask implements Task {
-    private final static Logger LOGGER = LoggerFactory.getLogger(SwfTask.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SwfTask.class);
 
     private final TaskContext jobContext;
     private Long fileId;
@@ -55,20 +55,20 @@ public class SwfTask implements Task {
     public SwfTask(CveTool tool, TaskContext jobContext, ObjectDataWrapper data) {
         this.tool = tool;
         this.jobContext = jobContext;
-        this.fileId = data.getReferenceId("content");
-        this.dataId = data.getId();
+        fileId = data.getReferenceId("content");
+        dataId = data.getId();
     }
 
     @Override
-    public boolean takesMuchTime() {
+    public final boolean takesMuchTime() {
         return fileId != null;
     }
 
     @Override
-    public void process() throws ParameterException, ResourceException, StorageException {
+    public final void process() throws ParameterException, ResourceException, StorageException {
         if (fileId == null) {
             LOGGER.info("Task (id={}, jobId={}, objectId={}) skipped", new Object[]{jobContext.getReqId(), jobContext.getJobId(), dataId});
-            System.out.println("Task skipped");
+            System.out.println("Task skipped"); //NOPMD
         } else {
             File file = null;
             try {
@@ -93,7 +93,9 @@ public class SwfTask implements Task {
                 }
             } finally {
                 if (file != null)
-                    file.delete();
+                    if (!file.delete()) {
+                    	LOGGER.error("Cannot delete file: {}", file.getName());
+                    }
             }
         }
     }

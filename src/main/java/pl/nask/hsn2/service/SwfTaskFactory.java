@@ -1,8 +1,8 @@
 /*
  * Copyright (c) NASK, NCSC
- * 
+ *
  * This file is part of HoneySpider Network 2.0.
- * 
+ *
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -32,15 +32,14 @@ public class SwfTaskFactory implements TaskFactory {
     private static CveTool tool;
 
     public static void prepereForAllThreads(String pluginsPath) {
-    	CveTool tool = initCveTool(pluginsPath);
-        SwfTaskFactory.tool = tool;
+        SwfTaskFactory.tool = initCveTool(pluginsPath);
     }
 
     @Override
-    public Task newTask(TaskContext jobContext, ParametersWrapper parameters, ObjectDataWrapper data) throws ParameterException {
+    public final Task newTask(TaskContext jobContext, ParametersWrapper parameters, ObjectDataWrapper data) throws ParameterException {
     	return new SwfTask(tool, jobContext, data);
     }
-    
+
     private static CveTool initCveTool(String pluginsDirectory) {
 		CveTool ct = new CveTool();
 		ct.loadPlugins(pluginsDirectory);

@@ -1,8 +1,8 @@
 /*
  * Copyright (c) NASK, NCSC
- * 
+ *
  * This file is part of HoneySpider Network 2.0.
- * 
+ *
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -29,17 +29,17 @@ import pl.nask.hsn2.CommandLineParams;
 import pl.nask.hsn2.GenericServiceInfo;
 
 public class SwfCommandLineParams extends CommandLineParams {
-	private final static Logger LOGGER = LoggerFactory.getLogger(SwfCommandLineParams.class);
-	private final static OptionNameWrapper PLUGINS_PATH = new OptionNameWrapper("plugins", "pluginsPath");
+	private static final Logger LOGGER = LoggerFactory.getLogger(SwfCommandLineParams.class);
+	private static final OptionNameWrapper PLUGINS_PATH = new OptionNameWrapper("plugins", "pluginsPath");
 
 	@Override
-	public void initOptions() {
+	public final void initOptions() {
 		super.initOptions();
 		addOption(PLUGINS_PATH, "path", "Full path to plugins directory");
 	}
 
 	@Override
-	protected void initDefaults() {
+	protected final void initDefaults() {
 		super.initDefaults();
 		setDefaultServiceNameAndQueueName("swf-cve");
 		try {
@@ -49,11 +49,11 @@ public class SwfCommandLineParams extends CommandLineParams {
 		}
 	}
 
-	public void setDefaultPluginsPath(String pluginsPath) {
+	public final void setDefaultPluginsPath(String pluginsPath) {
 		setDefaultValue(PLUGINS_PATH, pluginsPath);
 	}
 
-	public String getPluginsPath() {
+	public final String getPluginsPath() {
 		return getOptionValue(PLUGINS_PATH);
 	}
 }
