@@ -1,7 +1,7 @@
 /*
  * Copyright (c) NASK, NCSC
  * 
- * This file is part of HoneySpider Network 2.0.
+ * This file is part of HoneySpider Network 2.1.
  * 
  * This is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,35 +19,42 @@
 
 package pl.nask.hsn2.service;
 
-import pl.nask.hsn2.GenericService;
-import pl.nask.swftool.cvetool.CveTool;
+import org.apache.commons.daemon.DaemonContext;
+import org.apache.commons.daemon.DaemonController;
+import org.apache.commons.daemon.DaemonInitException;
 
-public final class SwfService {
-	private SwfService() {}
+import pl.nask.hsn2.CommandLineParams;
+import pl.nask.hsn2.ServiceMain;
+import pl.nask.hsn2.task.TaskFactory;
 
-	public static void main(String[] args) throws InterruptedException {
-		SwfCommandLineParams cmd = parseArguments(args);
-
-		CveTool tool = initCveTool(cmd.getPluginsPath());
-		GenericService service = new GenericService(new SwfTaskFactory(tool), cmd.getMaxThreads(), cmd.getRbtCommonExchangeName(), cmd.getRbtNotifyExchangeName());
-
-		cmd.applyArguments(service);
-		service.run();
+public final class SwfService extends ServiceMain {
+	
+	public static void main(final String[] args) throws DaemonInitException, InterruptedException {
+		SwfService swfs = new SwfService();
+		swfs.init(new DaemonContext() {
+			public DaemonController getController() {
+				return null;
+			}
+			public String[] getArguments() {
+				return args;
+			}
+		});
+		swfs.start();
 	}
 
-	private static CveTool initCveTool(String pluginsDirectory) {
-		CveTool ct = new CveTool();
-		ct.loadPlugins(pluginsDirectory);
-		ct.printPluginsInfo();
-		ct.bulidPluginsDistributor();
-
-		return ct;
+	@Override
+	protected void prepareService() {
 	}
 
-	private static SwfCommandLineParams parseArguments(String[] args) {
-		SwfCommandLineParams params = new SwfCommandLineParams();
-		params.parseParams(args);
+	@Override
+	protected CommandLineParams newCommandLineParams() {
+		return new SwfCommandLineParams();
+	}
 
-		return params;
+	@Override
+	protected Class<? extends TaskFactory> initializeTaskFactory() {
+		SwfCommandLineParams cmd = (SwfCommandLineParams)getCommandLineParams();
+		SwfTaskFactory.prepereForAllThreads(cmd.getPluginsPath());
+		return SwfTaskFactory.class;
 	}
 }
